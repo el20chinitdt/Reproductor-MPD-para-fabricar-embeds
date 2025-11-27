@@ -86,3 +86,39 @@ html, body {
 #loading-overlay.hide { opacity:0; pointer-events:none; }
 
 #loading-bar { width:0%; height:4px; background:var(--accent-grad); margin-top:10px; border-radius:2px; }
+
+#intro-logo {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:250px; height:auto; opacity:0; transition: opacity 1.2s ease; z-index:2000;
+}
+#intro-logo.show { opacity:1; animation:fadeInOut 3s forwards; }
+
+@keyframes fadeInOut { 0%{opacity:0} 20%{opacity:1} 80%{opacity:1} 100%{opacity:0} }
+
+</style>
+</head>
+<body>
+
+<div id="video-wrap">
+  <div id="video-card">
+    <div id="video-container" role="region" aria-label="Video player">
+      <video id="player" playsinline></video>
+
+      <div id="seekFeedback" class="seek-feedback">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+          <path d="M12 6v6l4 2" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="12" r="9" stroke="white" stroke-opacity="0.15" stroke-width="1.2"/>
+        </svg>
+      </div>
+
+      <div id="loading-overlay">
+        <img id="intro-logo" src="https://blogger.googleusercontent.com/img/a/AVvXsEgrc23VOKiDqYPo92EdvxiSlbGiq2pWAA3WCcRGShax913ZCTqLoUN47Q-b2Ecbdd0pbjxxHMlXKYn07H1WhgLR7zFoqAekBf5BnoLD9LX882taGZZsbwm7lrUAW5trrLPiu0KaY59913jLfEZhhlW_PY15ss59Z1S7QCfRAPaTsWtYm-Hx9uqWd_3NbdY=s166" alt="Logo">
+        <div id="loading-bar"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="errorMessage" style="text-align:center;color:#f55;font-weight:600;padding:10px;display:none;"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/shaka-player@latest/dist/shaka-player.compiled.js"></script>
