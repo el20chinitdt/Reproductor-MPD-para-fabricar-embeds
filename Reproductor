@@ -186,3 +186,41 @@ html, body {
     document.addEventListener('click', e=>{
       const rewindBtn=e.target.closest('.plyr__control--rewind');
       const ffBtn=e.target.closest('.plyr__control--fast-forward');
+      if(rewindBtn) showFeedback(-SEEK_STEP);
+      else if(ffBtn) showFeedback(SEEK_STEP);
+    });
+
+    function showFeedback(amount){
+      try{ 
+        const dur = isFinite(video.duration) ? video.duration : Infinity; 
+        video.currentTime = Math.max(0, Math.min((video.currentTime||0)+amount, dur)); 
+      } catch(e){}
+      seekFeedback.classList.remove('show'); 
+      void seekFeedback.offsetWidth; 
+      seekFeedback.classList.add('show'); 
+      clearTimeout(seekFeedback._timeout);
+      seekFeedback._timeout = setTimeout(() => seekFeedback.classList.remove('show'), 700);
+    }
+
+    try{
+      const exclude=/SmartTV|Tizen|Web0S|WebOS|SmartHub|Chromecast|AppleTV|Roku|FireTV|AndroidTV|VIdaa|iPhone|iPad|iPod|Android/i;
+      if(!exclude.test(navigator.userAgent) && window.AudioContext){
+        const audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+        const source=audioCtx.createMediaElementSource(video);
+        const gainNode=audioCtx.createGain();
+        gainNode.gain.value=2;
+        source.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+      }
+    }catch(err){console.warn('Audio boost falló',err);}
+
+    video.muted=false; video.volume=1;
+    function tryPlay(){ video.play().catch(err=>console.log('Autoplay bloqueado',err)); }
+    tryPlay();
+    function onFirstInteraction(){ video.muted=false; video.volume=1; tryPlay(); window.removeEventListener('click',onFirstInteraction); window.removeEventListener('keydown',onFirstInteraction); window.removeEventListener('touchstart',onFirstInteraction);}
+    window.addEventListener('click',onFirstInteraction);
+    window.addEventListener('keydown',onFirstInteraction);
+    window.addEventListener('touchstart',onFirstInteraction);
+
+    plyrInstance.on('enterfullscreen',async()=>{
+      try{ 
