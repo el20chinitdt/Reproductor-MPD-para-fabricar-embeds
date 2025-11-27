@@ -1,1 +1,125 @@
+<div style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:9999;">
+  <iframe
+    srcdoc='
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        html, body {
+          margin:0;
+          padding:0;
+          background:#000;
+          width:100%;
+          height:100%;
+          overflow:hidden;
+        }
+        #player { width:100%; height:100%; }
+      </style>
 
+      <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/dash-shaka-playback@latest/dist/dash-shaka-playback.min.js"></script>
+    </head>
+
+    <body>
+      <div id="player"></div>
+
+      <script>
+        const player = new Clappr.Player({
+          parentId: "#player",
+          plugins: [DashShakaPlayback],
+
+          /* ===============================
+             COMPLETÁ ESTO VOS:
+             =============================== */
+
+          source: "https://cdn02.gigared.com.ar/live/eds/Canal_12_Misiones/sa_live_dash/Canal_12_Misiones.mpd",
+
+          shakaConfiguration: {
+            drm: {
+              clearKeys: {
+                "ed6e9faec04aa78f261171d1ace48957": "2995fa69fa1158e82547d5d5a22b4e98"
+              }
+            }
+          },
+
+          /* =============================== */
+
+          autoPlay: true,
+          width: "100%",
+          height: "100%",
+          mute: false
+        });
+
+        /* ********************************************
+           AQUI VAN TUS FUNCIONES AGREGADAS COMPLETAS
+           ******************************************** */
+
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isSmartTV = /SmartTV|Tizen|Web0S|SmartHub|Chromecast/i.test(navigator.userAgent);
+
+        // Audio Boost
+        if (!isSmartTV) {
+          player.on("play", function () {
+            const video = document.querySelector("#player video");
+            if (video && !video.audioBoostApplied) {
+              try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioCtx.createMediaElementSource(video);
+                const gain = audioCtx.createGain();
+                gain.gain.value = 2;
+                source.connect(gain);
+                gain.connect(audioCtx.destination);
+                video.muted = false;
+                video.volume = 1.0;
+                video.audioBoostApplied = true;
+              } catch(e) {
+                console.warn("Audio boost no disponible:", e);
+              }
+            }
+          });
+        }
+
+        // SmartTV fallback
+        if (isSmartTV) {
+          player.on("ready", function () {
+            const video = document.querySelector("#player video");
+            if (video) {
+              video.muted = false;
+              try { video.volume = 1.0; } catch(e){}
+            }
+          });
+        }
+
+        // Auto selección de audio
+        const lang = 1;
+        player.on("play", () => player.setCurrentAudioTrack(lang));
+
+        // Rotación automática
+        player.on("fullscreen", function(e) {
+          const contenedor = document.getElementById("player");
+
+          if (!isIOS && screen.orientation) {
+            if (e.fullscreen) {
+              const tryLock = async () => {
+                try { await screen.orientation.lock("landscape"); }
+                catch(err) { setTimeout(tryLock, 200); }
+              };
+              tryLock();
+            } else {
+              try { screen.orientation.unlock(); } catch(err) {}
+            }
+          }
+
+          if (isIOS) {
+            if (e.fullscreen) contenedor.classList.add("ios-landscape");
+            else contenedor.classList.remove("ios-landscape");
+          }
+        });
+      </script>
+    </body>
+    </html>'
+    style="width:100%; height:100%; border:none;"
+    allowfullscreen>
+  </iframe>
+</div>
