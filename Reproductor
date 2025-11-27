@@ -235,3 +235,51 @@ html, body {
     });
 
     player.addEventListener('trackschanged', () => {
+      try {
+        const variants = player.getVariantTracks();
+        if (!variants || variants.length === 0) return;
+        const esTrack = variants.find(t => t.language && t.language.toLowerCase().startsWith('es'));
+        if (esTrack) {
+          player.selectAudioLanguage('es');
+          player.selectVariantTrack(esTrack, true);
+          console.log('🎧 Audio forzado a Español (track selected):', esTrack);
+        }
+      } catch (err) {
+        console.warn('Error al forzar audio español:', err);
+      }
+    });
+
+    player.addEventListener('error',evt=>{
+      const err=evt.detail;
+      console.error('Shaka error',err);
+      errorMessage.textContent='Error de reproducción: '+(err&&err.message?err.message:'desconocido');
+      errorMessage.style.display='block';
+    });
+
+    video.addEventListener('progress', () => {
+      try{
+        const bar=document.getElementById('loading-bar');
+        if(video.buffered.length){
+          const bufferedEnd = video.buffered.end(video.buffered.length-1);
+          const duration = video.duration || 1;
+          const pct = Math.min(100, (bufferedEnd / duration) * 100);
+          bar.style.width = pct + '%';
+        }
+      }catch(e){}
+    });
+
+    video.addEventListener('playing', ()=>{
+      loadingOverlay.classList.add('hide');
+      introLogo.classList.remove('show');
+    });
+
+  }catch(err){
+    console.error('Error reproductor',err);
+    errorMessage.textContent='Error al inicializar: '+(err.message||err);
+    errorMessage.style.display='block';
+  }
+})();
+</script>
+
+</body>
+</html>
