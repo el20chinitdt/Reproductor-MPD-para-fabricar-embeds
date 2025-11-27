@@ -104,7 +104,7 @@ html, body {
     <div id="video-container" role="region" aria-label="Video player">
       <video id="player" playsinline></video>
 
-      <div id="seekFeedback" class="seek-feedback">
+       <div id="seekFeedback" class="seek-feedback">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
           <path d="M12 6v6l4 2" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
           <circle cx="12" cy="12" r="9" stroke="white" stroke-opacity="0.15" stroke-width="1.2"/>
@@ -122,3 +122,18 @@ html, body {
 <div id="errorMessage" style="text-align:center;color:#f55;font-weight:600;padding:10px;display:none;"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/shaka-player@latest/dist/shaka-player.compiled.js"></script>
+<script src="https://cdn.plyr.io/3.7.2/plyr.js"></script>
+
+<script>
+(async function(){
+  const video=document.getElementById('player');
+  const container=document.getElementById('video-container');
+  const errorMessage=document.getElementById('errorMessage');
+  const seekFeedback=document.getElementById('seekFeedback');
+  const loadingOverlay=document.getElementById('loading-overlay');
+  const introLogo=document.getElementById('intro-logo');
+
+  const mpdUrl="https://el4live1.boldmss.com/AM24/AM24_EL4.isml/AM24.mpd";
+  const clearKeys={"bfbd16ff845e47cf8926aa228c6acf3f":"6234ff5accd06fd973d6762e83abcc52"};
+
+  try{ shaka.polyfill.installAll(); }catch(e){ console.warn('shaka.polyfill.installAll falló', e); }
