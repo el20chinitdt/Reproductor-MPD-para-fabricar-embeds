@@ -137,3 +137,52 @@ html, body {
   const clearKeys={"bfbd16ff845e47cf8926aa228c6acf3f":"6234ff5accd06fd973d6762e83abcc52"};
 
   try{ shaka.polyfill.installAll(); }catch(e){ console.warn('shaka.polyfill.installAll falló', e); }
+
+  if(!shaka.Player.isBrowserSupported()){
+    errorMessage.textContent='Este navegador no soporta Shaka Player.';
+    errorMessage.style.display='block';
+    return;
+  }
+
+  try{
+    const player=new shaka.Player(video);
+
+    player.configure({
+      drm:{ clearKeys },
+      abr:{ enabled:true, defaultBandwidthEstimate:5000000 },
+      streaming:{ 
+        bufferingGoal:3, 
+        rebufferingGoal:5, 
+        lowLatencyMode:true, 
+        stallSkip:true, 
+        retryParameters:{ maxAttempts:2, baseDelay:200, backoffFactor:1.7, fuzzFactor:0.25, timeout:6000 } 
+      },
+      preferredAudioLanguage: 'es'
+    });
+
+    if(!sessionStorage.getItem('introShown')){
+      introLogo.classList.add('show');
+      setTimeout(()=>{
+        introLogo.classList.remove('show');
+        loadingOverlay.classList.add('hide');
+        sessionStorage.setItem('introShown','true');
+        video.play().catch(()=>{});
+      },3000);
+    } else {
+      loadingOverlay.classList.add('hide');
+      video.play().catch(()=>{});
+    }
+
+    await player.load(mpdUrl);
+
+    const plyrInstance=new Plyr(video,{
+      controls:['play-large','rewind','play','fast-forward','progress','current-time','mute','volume','settings','pip','fullscreen'],
+      settings:['quality','speed','loop'],
+      autoplay:true,
+      keyboard:{ global:true }
+    });
+
+    const SEEK_STEP = 10;
+    document.addEventListener('click', e=>{
+      const rewindBtn=e.target.closest('.plyr__control--rewind');
+      const ffBtn=e.target.closest('.plyr__control--fast-forward');
