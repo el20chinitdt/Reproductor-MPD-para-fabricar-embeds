@@ -175,12 +175,15 @@ html, body {
 
     await player.load(mpdUrl);
 
-    const plyrInstance=new Plyr(video,{
-      controls:['play-large','rewind','play','fast-forward','progress','current-time','mute','volume','settings','pip','fullscreen'],
-      settings:['quality','speed','loop'],
-      autoplay:true,
-      keyboard:{ global:true }
-    });
+    const plyrInstance = new Plyr(video,{
+  controls:['play-large','rewind','play','fast-forward','progress','current-time','mute','volume','settings','pip','fullscreen'],
+  settings:['quality','speed','loop'],
+  autoplay:true,
+  keyboard:{ global:true }
+});
+
+// ✅ Forzar velocidad normal por defecto
+video.playbackRate = 1;
 
     const SEEK_STEP = 10;
     document.addEventListener('click', e=>{
