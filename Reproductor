@@ -1,1 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<link rel="stylesheet" href="https://cdn.plyr.io/3.7.2/plyr.css">
+
+<style>
+:root {
+  --bg-dark:#06070a;
+  --accent-grad:linear-gradient(90deg,#f7a42b,#f45c9f);
+  --muted-white:rgba(255,255,255,0.92);
+  --soft-shadow:0 6px 18px rgba(0,0,0,0.6);
+}
+
+/* Fullscreen reproductor, tapa todo */
+html, body {
+  margin:0; padding:0;
+  width:100vw; height:100vh;
+  background:#000;
+  overflow:hidden;
+}
+
+#video-wrap {
+  position:fixed;
+  top:0; left:0;
+  width:100vw; height:100vh;
+  z-index:9999;
+  display:flex;
+  justify-content:center;
+  align-items:stretch;
+}
+
+#video-card {
+  width:100%; height:100%;
+  border-radius:0; overflow:hidden; position:relative;
+  box-shadow:var(--soft-shadow);
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.25));
+  border:1px solid rgba(255,255,255,0.03);
+}
+
+#video-container {
+  position:relative;
+  width:100%; height:100%;
+  background:#000;
+  overflow:hidden;
+}
+
+#video-container > video,
+#video-container > div {
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100%;
+  object-fit:cover;
+}
+
+/* Plyr */
+.plyr { --plyr-control-spacing:8px; --plyr-color-main:#ffffff; --plyr-radius:10px; z-index:1001; }
+.plyr__controls {
+  background: linear-gradient(180deg, rgba(8,9,12,0.45), rgba(8,9,12,0.3));
+  backdrop-filter:blur(6px);
