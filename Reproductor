@@ -1,1 +1,52 @@
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      font-family: sans-serif;
+    }
 
+    .player-container {
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      aspect-ratio: 16 / 9; /* mantiene proporción */
+      overflow: hidden;      /* recorta bordes */
+      margin: 0 auto;
+      background: #000;
+    }
+
+    .player-container iframe {
+      position: absolute;
+      top: 0;      /* mantener al mismo nivel vertical */
+      left: 50%;   /* centrar horizontalmente */
+      width: 110%; /* solo estira un poco horizontalmente */
+      height: 100%; /* mantiene altura original */
+      transform: translateX(-50%); /* centra horizontalmente */
+      border: none;
+      outline: none;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="player-container">
+    <iframe
+      id="iframe_repro"
+      sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
+      src="https://elchinihdpremium.blogspot.com/p/el-trece-amba.html"
+      allow="encrypted-media"
+      allowfullscreen
+      scrolling="no">
+    </iframe>
+  </div>
+</body>
+</html>
+
+otro subdominio https://elchinihdpremium.blogspot.com
+
+sayonaraaa!!
