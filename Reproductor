@@ -1,130 +1,140 @@
-<div id="player-container" 
-  style="position:fixed; top:0; left:0; width:100vw; height:100vh; 
-  z-index:9999; background:#000; pointer-events:auto;">
-</div>
-
-<!-- 🔥 Clappr actualizado -->
-<script src="https://cdn.jsdelivr.net/gh/clappr/clappr@latest/dist/clappr.min.js"></script>
-
-<!-- 🔥 Dash-Shaka-Playback actualizado -->
-<script src="https://cdn.jsdelivr.net/gh/clappr/dash-shaka-playback@latest/dist/dash-shaka-playback.min.js"></script>
-
-<script>
-const player = new Clappr.Player({
-  parentId: "#player-container",
-  plugins: [DashShakaPlayback],
-  source: "https://cdn02.gigared.com.ar/live/eds/Canal_12_Misiones/sa_live_dash/Canal_12_Misiones.mpd",
-
-  shakaConfiguration: {
-    preferredAudioLanguage: 'es',
-    drm: {
-      clearKeys: {
-        "ed6e9faec04aa78f261171d1ace48957": "2995fa69fa1158e82547d5d5a22b4e98"
-      }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <style>
+    body, html { 
+      margin: 0; padding: 0; width: 100%; height: 100%; 
+      background: #000; overflow: hidden; 
     }
-  },
 
-  autoPlay: true,
-  width: "100vw",
-  height: "100vh",
-  mute: false
-});
-
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-const isSmartTV = /SmartTV|Tizen|Web0S|SmartHub|Chromecast/i.test(navigator.userAgent);
-
-// =========================
-// AUDIO BOOST
-// =========================
-if (!isSmartTV) {
-  player.on("play", function () {
-    const video = document.querySelector("#player-container video");
-    if (video && !video.audioBoostApplied) {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const source = audioCtx.createMediaElementSource(video);
-        const gain = audioCtx.createGain();
-        gain.gain.value = 2;
-        source.connect(gain);
-        gain.connect(audioCtx.destination);
-        video.muted = false;
-        video.volume = 1.0;
-        video.audioBoostApplied = true;
-      } catch(e) {
-        console.warn("Audio boost no disponible:", e);
-      }
+    #player-container {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 9999; background: #000;
     }
-  });
-}
 
-// =========================
-// SMART TV FALLBACK
-// =========================
-if (isSmartTV) {
-  player.on("ready", function () {
-    const video = document.querySelector("#player-container video");
-    if (video) {
-      video.muted = false;
-      try { video.volume = 1.0; } catch(e){}
+    /* 🔥 ROTACIÓN PARA iOS */
+    .ios-landscape {
+      transform: rotate(90deg);
+      transform-origin: center center;
+      width: 100vh !important; 
+      height: 100vw !important;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      margin-top: -50vw; 
+      margin-left: -50vh;
+      z-index: 10000;
     }
-  });
-}
 
-// =========================
-// ROTACIÓN
-// =========================
-player.on("fullscreen", function(e) {
-  const contenedor = document.getElementById("player-container");
+    * { -webkit-tap-highlight-color: transparent; outline: none; }
+  </style>
+</head>
+<body>
 
-  if (!isIOS && screen.orientation) {
-    if (e.fullscreen) {
-      const tryLock = async () => {
-        try { await screen.orientation.lock("landscape"); }
-        catch(err) { setTimeout(tryLock, 200); }
-      };
-      tryLock();
-    } else {
-      try { screen.orientation.unlock(); } catch(err) {}
-    }
-  }
+  <div id="player-container"></div>
 
-  if (isIOS) {
-    if (e.fullscreen) contenedor.classList.add("ios-landscape");
-    else contenedor.classList.remove("ios-landscape");
-  }
-});
+  <script src="https://cdn.jsdelivr.net/gh/clappr/clappr@latest/dist/clappr.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/clappr/dash-shaka-playback@latest/dist/dash-shaka-playback.min.js"></script>
 
-// =========================
-// WAKELOCK — versión funcional
-// =========================
-let wakeLock = null;
-let wakeLockSentinel = null;
+  <script>
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-async function activarWakeLock() {
-  try {
-    if ("wakeLock" in navigator) {
-      wakeLockSentinel = await navigator.wakeLock.request("screen");
-      wakeLock = true;
+    const player = new Clappr.Player({
+      parentId: "#player-container",
+      plugins: [DashShakaPlayback],
+      source: "https://cors-proxy.wangzhishi.net/https://tvfuego.cdn.rcs.net.ar/HGxWMSZtXcn2A3b9zrDfUL/lpi5300000011aspgysk33uc55vuihwg/output.mpd",
+      
+      shakaConfiguration: {
+        preferredAudioLanguage: 'es',
+        drm: {
+          clearKeys: {
+            "6a47917ca83343ea8dcca63189e36d78": "84b0fe420ed5de7ef83c608d78d74f15"
+          }
+        },
+        streaming: {
+          lowLatencyMode: true,
+          jumpLargeGaps: true
+        }
+      },
 
-      wakeLockSentinel.addEventListener("release", () => {
-        wakeLock = false;
-        console.log("WakeLock liberado");
+      autoPlay: true,
+      width: "100vw",
+      height: "100vh",
+      mute: false,
+      disableVideoTagContextMenu: true
+    });
+
+    // ==========================================
+    // GESTOS: Fullscreen y Bloqueo de Pausa
+    // ==========================================
+    player.on(Clappr.Events.PLAYER_READY, function() {
+      const video = document.querySelector("#player-container video");
+      if (!video) return;
+
+      let lastTap = 0;
+
+      // Doble Tap -> Fullscreen
+      video.addEventListener('touchend', function(e) {
+        const now = new Date().getTime();
+        const timesince = now - lastTap;
+        
+        if (timesince < 300 && timesince > 0) {
+          if (player.core.isFullscreen()) {
+            player.core.exitFullscreen();
+          } else {
+            player.core.toggleFullscreen();
+          }
+          e.preventDefault();
+        }
+        lastTap = now;
       });
 
-      console.log("WakeLock activado");
+      // Evita pausa y retroceso al tocar una vez
+      video.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }, true);
+    });
+
+    // =========================
+    // LÓGICA DE ORIENTACIÓN
+    // =========================
+    player.on("fullscreen", async function(isFullscreen) {
+      const contenedor = document.getElementById("player-container");
+      
+      if (isFullscreen) {
+        if (!isIOS && screen.orientation?.lock) {
+          try { await screen.orientation.lock("landscape"); } catch(e) {}
+        } else if (isIOS) {
+          contenedor.classList.add("ios-landscape");
+        }
+      } else {
+        if (!isIOS && screen.orientation?.unlock) {
+          try { screen.orientation.unlock(); } catch(e) {}
+        }
+        if (isIOS) contenedor.classList.remove("ios-landscape");
+      }
+    });
+
+    // =========================
+    // WAKELOCK (Pantalla siempre encendida)
+    // =========================
+    let wakeLock = null;
+    async function activarWakeLock() {
+      if ("wakeLock" in navigator) {
+        try {
+          wakeLock = await navigator.wakeLock.request("screen");
+        } catch (err) {}
+      }
     }
-  } catch (err) {
-    console.error("No se pudo activar WakeLock:", err);
-  }
-}
+    player.on("play", () => activarWakeLock());
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") activarWakeLock();
+    });
 
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible" && !wakeLock) {
-    activarWakeLock();
-  }
-});
-
-player.on("play", () => {
-  activarWakeLock();
-});
-</script>
+  </script>
+</body>
+</html>
